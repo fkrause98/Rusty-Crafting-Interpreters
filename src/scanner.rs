@@ -49,12 +49,28 @@ impl Scanner {
             }
             TokenType::IGNORE => {}
             TokenType::WHITESPACE => {
-                self.line+= 1;
+                self.string()
             }
             _type => self.add_token(_type, None),
         };
     }
 
+    fn string(&mut self) {
+        while self.peek() != '\n' && self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+        if self.is_at_end() {
+            panic!("Unterminated string at: {}", self.line)
+        }
+        self.advance();
+        let start = (self.start + 1) as usize;
+        let end = (self.current - 1) as usize;
+        let value = self.source.get(start..end).unwrap();
+        self.add_token(TokenType::STRING, Some(Literal::String(value.to_string())))
+    }
     fn peek(&mut self) -> char {
         if self.is_at_end() {
             return '\0';

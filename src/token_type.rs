@@ -72,7 +72,8 @@ impl From<char> for TokenType {
             '<' => TokenType::LESS,
             '>' => TokenType::GREATER,
             ' ' | '\r' | '\t' => TokenType::IGNORE,
-            '\t' => TokenType::WHITESPACE,
+            '\n' => TokenType::WHITESPACE,
+            '"' => TokenType::STRING,
             _ => unreachable!("Unknown token!"),
         }
     }
