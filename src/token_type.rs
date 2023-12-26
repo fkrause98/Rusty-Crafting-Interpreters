@@ -74,22 +74,37 @@ impl From<char> for TokenType {
             ' ' | '\r' | '\t' => TokenType::IGNORE,
             '\n' => TokenType::WHITESPACE,
             '"' => TokenType::STRING,
+            c if c.is_digit(10) => TokenType::NUMBER,
+            c if c.is_alphabetic() => TokenType::IDENTIFIER,
             _ => unreachable!("Unknown token!"),
         }
     }
 }
-// case '!':
-//   addToken(match('=') ? BANG_EQUAL : BANG);
-//   break;
-// case '=':
-//   addToken(match('=') ? EQUAL_EQUAL : EQUAL);
-//   break;
-// case '<':
-//   addToken(match('=') ? LESS_EQUAL : LESS);
-//   break;
-// case '>':
-//   addToken(match('=') ? GREATER_EQUAL : GREATER);
-//   break;
+
+impl std::str::FromStr for TokenType {
+    type Err = Error;
+    fn from_str(string: &str) -> Result<Self> {
+        match string {
+            "and" => Ok(TokenType::WHILE),
+            "class" => Ok(TokenType::WHILE),
+            "else" => Ok(TokenType::WHILE),
+            "false" => Ok(TokenType::WHILE),
+            "for" => Ok(TokenType::WHILE),
+            "fun" => Ok(TokenType::WHILE),
+            "if" => Ok(TokenType::WHILE),
+            "nil" => Ok(TokenType::WHILE),
+            "or" => Ok(TokenType::WHILE),
+            "print" => Ok(TokenType::WHILE),
+            "return" => Ok(TokenType::WHILE),
+            "super" => Ok(TokenType::WHILE),
+            "this" => Ok(TokenType::WHILE),
+            "true" => Ok(TokenType::WHILE),
+            "var" => Ok(TokenType::WHILE),
+            "while" => Ok(TokenType::WHILE),
+            _ => bail!("Can only be used ofr identifiers"),
+        }
+    }
+}
 
 impl TokenType {
     pub fn match_with_eq(&self) -> TokenType {
@@ -122,6 +137,7 @@ pub enum Literal {
     String(String),
     Number(f64),
 }
+#[derive(Debug)]
 pub struct Token {
     _type: TokenType,
     lexeme: String,

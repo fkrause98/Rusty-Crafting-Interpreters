@@ -35,7 +35,11 @@ impl Lox {
     }
 
     pub fn run(&mut self, source: &str) {
-        println!("{:?}", source);
+        let mut scanner = Scanner::new(source);
+        let tokens = scanner.scan_tokens();
+        for token in tokens {
+            println!("{:?}", token);
+        }
         if self.had_error {
             exit(65);
         }

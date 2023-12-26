@@ -1,3 +1,6 @@
+use anyhow::Result;
+use scanner_rust::generic_array::typenum::NonZero;
+use std::str::FromStr;
 use crate::token_type::{
     Literal, Token,
     TokenType::{self, BANG, EOF, EQUAL, GREATER, LESS},
@@ -48,11 +51,54 @@ impl Scanner {
                 }
             }
             TokenType::IGNORE => {}
-            TokenType::WHITESPACE => {
-                self.string()
-            }
+            TokenType::WHITESPACE => self.string(),
+            TokenType::NUMBER => self.number(),
+            TokenType::IDENTIFIER => self.identifier(),
             _type => self.add_token(_type, None),
         };
+    }
+
+    fn identifier(&mut self) {
+        while self.peek().is_alphanumeric() {
+            self.advance();
+        }
+        let start = self.start as usize;
+        let current = self.current as usize;
+        let text = self.source.get(start..current).unwrap();
+        let _type: Result<TokenType> = text.parse::<TokenType>();
+        match _type {
+            Ok(keyword) => self.add_token(keyword, None),
+            Err(_) => self.add_token(TokenType::IDENTIFIER, None)
+        }
+    }
+
+    fn number(&mut self) {
+        while self.peek().is_digit(10) {
+            self.advance();
+        }
+        if self.peek() == '.' && self.peek_next().is_digit(10) {
+            self.advance();
+
+            while self.peek_next().is_digit(10) {
+                self.advance();
+            }
+        }
+        let start = self.start as usize;
+        let current = self.current as usize;
+        let source = &self.source;
+        let literal_number = source.get(start..current).expect("Wrong slice");
+        let number = Literal::Number(literal_number.parse::<f64>().expect("Not a number"));
+        self.add_token(TokenType::NUMBER, Some(number))
+    }
+
+    fn peek_next(&self) -> char {
+        let next_char_index = (self.current + 1) as usize;
+        // TODO: Return Option<Char> and turn this into a map.
+        if let Some(next_char) = self.source.chars().nth(next_char_index) {
+            return next_char;
+        } else {
+            return '\0';
+        }
     }
 
     fn string(&mut self) {
