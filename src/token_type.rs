@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::string::ToString;
 
 use anyhow::{bail, Error, Ok, Result};
+use scanner_rust::generic_array::typenum::Minimum;
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum TokenType {
@@ -56,8 +57,7 @@ pub enum TokenType {
 }
 impl From<char> for TokenType {
     fn from(c: char) -> Self {
-        let res =
-            match c {
+        let res = match c {
             '(' => TokenType::LEFT_PAREN,
             ')' => TokenType::RIGHT_PAREN,
             '{' => TokenType::LEFT_BRACE,
@@ -132,25 +132,35 @@ impl TokenType {
         )
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     String(String),
     Number(f64),
 }
-#[derive(Debug)]
+impl Literal {
+    pub fn inner(&self) -> String {
+        match self {
+            Self::String(string) => format!("{}", string),
+            Self::Number(num) => format!("{}", num),
+        }
+    }
+}
+#[derive(Debug, Clone)]
 pub struct Token {
-    _type: TokenType,
-    lexeme: String,
-    literal: Option<Literal>,
+    pub _type: TokenType,
+    pub lexeme: String,
+    pub literal: Option<Literal>,
+    pub line: usize
 }
 
 impl Token {
-    pub fn new(_type: TokenType, lexeme: &str, literal: Option<Literal>) -> Self {
+    pub fn new(_type: TokenType, lexeme: &str, literal: Option<Literal>, line: usize) -> Self {
         let lexeme = lexeme.to_string();
         Self {
             _type,
             lexeme,
             literal,
+            line
         }
     }
 }

@@ -22,7 +22,7 @@ impl Lox {
             match readline {
                 Ok(line) => {
                     println!("The line {line:?}");
-                    let line = format!("{}\n",line);
+                    let line = format!("{}\n", line);
                     self.run(&line);
                     self.had_error = false
                 }

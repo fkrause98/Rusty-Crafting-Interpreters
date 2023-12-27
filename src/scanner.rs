@@ -30,7 +30,7 @@ impl Scanner {
             self.start = self.current;
             self.scan_token().unwrap();
         }
-        self.tokens.push(Token::new(EOF, "", None));
+        self.tokens.push(Token::new(EOF, "", None, self.line as usize));
         &self.tokens
     }
 
@@ -60,19 +60,19 @@ impl Scanner {
             TokenType::STRING => {
                 println!("string branch");
                 self.string()?
-            },
+            }
             TokenType::NUMBER => {
                 println!("number branch");
                 self.number()?
-            },
+            }
             TokenType::IDENTIFIER => {
                 println!("id branch");
                 self.identifier()?
-            },
+            }
             _type => {
                 println!("identifier");
                 self.add_token(_type, None)
-            },
+            }
         };
         Ok(())
     }
@@ -179,6 +179,6 @@ impl Scanner {
         let start = self.start as usize;
         let end = self.current as usize;
         let text = source.get(start..end).expect("Empty token!");
-        self.tokens.push(Token::new(_type, text, literal))
+        self.tokens.push(Token::new(_type, text, literal, self.line as usize))
     }
 }
