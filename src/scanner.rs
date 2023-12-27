@@ -1,6 +1,6 @@
 use crate::token_type::{
     Literal, Token,
-    TokenType::{EOF, self},
+    TokenType::{self, EOF},
 };
 use anyhow::Context;
 use anyhow::Result;
@@ -25,17 +25,17 @@ impl Scanner {
             line: 1,
         }
     }
-    pub fn scan_tokens<'a>(&'a mut self) -> &'a Vec<Token> {
+    pub fn scan_tokens(&mut self) -> &Vec<Token> {
         while !self.is_at_end() {
             self.start = self.current;
             self.scan_token().unwrap();
         }
         self.tokens.push(Token::new(EOF, "", None));
-        return &self.tokens;
+        &self.tokens
     }
 
     fn is_at_end(&self) -> bool {
-        return self.current >= self.source.len() as u64;
+        self.current >= self.source.len() as u64
     }
 
     fn scan_token(&mut self) -> Result<()> {
@@ -61,13 +61,16 @@ impl Scanner {
         Ok(())
     }
 
-    fn identifier(&mut self) -> Result<()>{
+    fn identifier(&mut self) -> Result<()> {
         while self.peek()?.is_alphanumeric() {
             self.advance();
         }
         let start = self.start as usize;
         let current = self.current as usize;
-        let text = self.source.get(start..current).context("Expected identifier")?;
+        let text = self
+            .source
+            .get(start..current)
+            .context("Expected identifier")?;
         let _type: Result<TokenType> = text.parse::<TokenType>();
         match _type {
             Ok(keyword) => self.add_token(keyword, None),
@@ -77,13 +80,13 @@ impl Scanner {
     }
 
     fn number(&mut self) -> Result<()> {
-        while self.peek()?.is_digit(10) {
+        while self.peek()?.is_ascii_digit() {
             self.advance();
         }
-        if self.peek()? == '.' && self.peek_next().is_digit(10) {
+        if self.peek()? == '.' && self.peek_next().is_ascii_digit() {
             self.advance();
 
-            while self.peek_next().is_digit(10) {
+            while self.peek_next().is_ascii_digit() {
                 self.advance();
             }
         }
@@ -100,9 +103,9 @@ impl Scanner {
         let next_char_index = (self.current + 1) as usize;
         // TODO: Return Option<Char> and turn this into a map.
         if let Some(next_char) = self.source.chars().nth(next_char_index) {
-            return next_char;
+            next_char
         } else {
-            return '\0';
+            '\0'
         }
     }
 
@@ -119,7 +122,10 @@ impl Scanner {
         self.advance();
         let start = (self.start + 1) as usize;
         let end = (self.current - 1) as usize;
-        let value = self.source.get(start..end).context("Expected end of string")?;
+        let value = self
+            .source
+            .get(start..end)
+            .context("Expected end of string")?;
         self.add_token(TokenType::STRING, Some(Literal::String(value.to_string())));
         Ok(())
     }
@@ -127,7 +133,11 @@ impl Scanner {
         if self.is_at_end() {
             return Ok('\0');
         }
-        return self.source.chars().nth(self.current as usize).context("Reached EOF");
+        return self
+            .source
+            .chars()
+            .nth(self.current as usize)
+            .context("Reached EOF");
     }
 
     fn can_match_with(&mut self, token: &TokenType, expected: char) -> bool {
@@ -139,19 +149,18 @@ impl Scanner {
             return false;
         }
         self.current += 1;
-        return true;
+        true
     }
     fn advance(&mut self) -> Option<char> {
         let next = self.source.chars().nth(self.current as usize);
         self.current += 1;
-        return next;
+        next
     }
     fn add_token(&mut self, _type: TokenType, literal: Option<Literal>) {
         let source = &self.source;
         let start = self.start as usize;
         let end = self.current as usize;
         let text = source.get(start..end).expect("Empty token!");
-        self.tokens
-            .push(Token::new(_type, text, literal))
+        self.tokens.push(Token::new(_type, text, literal))
     }
 }

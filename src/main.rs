@@ -4,6 +4,8 @@ pub mod lox;
 pub mod scanner;
 pub mod token_type;
 use crate::lox::Lox;
+#[allow(clippy::print_literal)]
+#[allow(clippy::comparison_chain)]
 fn main() -> Result<()> {
     let mut args = args();
     args.next();

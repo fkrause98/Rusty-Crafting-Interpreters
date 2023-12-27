@@ -74,7 +74,7 @@ impl From<char> for TokenType {
             ' ' | '\r' | '\t' => TokenType::IGNORE,
             '\n' => TokenType::WHITESPACE,
             '"' => TokenType::STRING,
-            c if c.is_digit(10) => TokenType::NUMBER,
+            c if c.is_ascii_digit() => TokenType::NUMBER,
             c if c.is_alphabetic() => TokenType::IDENTIFIER,
             _ => unreachable!("Unknown token!"),
         }
@@ -123,13 +123,10 @@ impl TokenType {
         matches!(&self, TokenType::SLASH)
     }
     pub fn is_combinable_with_eq(&self) -> bool {
-        match self {
-            TokenType::BANG => true,
-            TokenType::EQUAL => true,
-            TokenType::LESS => true,
-            TokenType::GREATER => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            TokenType::BANG | TokenType::EQUAL | TokenType::LESS | TokenType::GREATER
+        )
     }
 }
 #[derive(Debug)]

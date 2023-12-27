@@ -6,11 +6,14 @@ use anyhow::Result;
 pub struct Lox {
     had_error: bool,
 }
+impl Default for Lox {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Lox {
     pub fn new() -> Self {
-        return Self {
-            had_error: false,
-        };
+        Self { had_error: false }
     }
     pub fn run_prompt(&mut self) -> Result<()> {
         let mut rl = rustyline::DefaultEditor::new()?;
@@ -47,9 +50,6 @@ impl Lox {
         self.report(line, "", message)
     }
     pub fn report(&mut self, line: usize, place: &str, message: &str) {
-        eprintln!(
-            "{}, {}, {}, {}, {}, {}",
-            "[line ", line, "] Error", place, ": ", message
-        );
+        eprintln!("[line , {}, ] Error, {}, : , {}", line, place, message);
     }
 }

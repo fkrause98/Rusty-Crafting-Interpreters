@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.76"
+clippy = "0.0.302"
 rustyline = "13.0.0"
 scanner-rust = "2.0.17"
