@@ -142,16 +142,14 @@ pub struct Token {
     _type: TokenType,
     lexeme: String,
     literal: Option<Literal>,
-    line: u64,
 }
 
 impl Token {
-    pub fn new(_type: TokenType, lexeme: &str, literal: Option<Literal>, line: u64) -> Self {
+    pub fn new(_type: TokenType, lexeme: &str, literal: Option<Literal>) -> Self {
         let lexeme = lexeme.to_string();
         Self {
             _type,
             lexeme,
-            line,
             literal,
         }
     }

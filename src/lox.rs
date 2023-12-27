@@ -5,13 +5,11 @@ use anyhow::Result;
 
 pub struct Lox {
     had_error: bool,
-    scanner: Option<Scanner>,
 }
 impl Lox {
     pub fn new() -> Self {
         return Self {
             had_error: false,
-            scanner: None,
         };
     }
     pub fn run_prompt(&mut self) -> Result<()> {

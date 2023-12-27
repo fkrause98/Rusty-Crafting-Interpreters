@@ -1,5 +1,4 @@
 use anyhow::Result;
-use rustyline;
 use std::{env::args, process::exit};
 pub mod lox;
 pub mod scanner;

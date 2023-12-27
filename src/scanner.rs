@@ -1,10 +1,9 @@
 use crate::token_type::{
     Literal, Token,
-    TokenType::{self, BANG, EOF, EQUAL, GREATER, LESS},
+    TokenType::{EOF, self},
 };
+use anyhow::Context;
 use anyhow::Result;
-use scanner_rust::generic_array::typenum::NonZero;
-use std::str::FromStr;
 #[derive(Debug)]
 pub struct Scanner {
     source: String,
@@ -27,11 +26,11 @@ impl Scanner {
         }
     }
     pub fn scan_tokens<'a>(&'a mut self) -> &'a Vec<Token> {
-        while (!self.is_at_end()) {
+        while !self.is_at_end() {
             self.start = self.current;
-            self.scan_token();
+            self.scan_token().unwrap();
         }
-        self.tokens.push(Token::new(EOF, "", None, self.line));
+        self.tokens.push(Token::new(EOF, "", None));
         return &self.tokens;
     }
 
@@ -39,45 +38,49 @@ impl Scanner {
         return self.current >= self.source.len() as u64;
     }
 
-    fn scan_token(&mut self) {
-        let c = self.advance().expect("No characters left!");
+    fn scan_token(&mut self) -> Result<()> {
+        let c = self
+            .advance()
+            .context("Scanner Error: No characters left!")?;
         match TokenType::from(c) {
             _type if _type.is_combinable_with_eq() && self.can_match_with(&_type, '=') => {
                 _type.match_with_eq();
                 self.add_token(_type, None)
             }
             _type if _type.is_combinable_with_div() && self.can_match_with(&_type, '/') => {
-                while (self.peek() != '\n' && !self.is_at_end()) {
+                while self.peek()? != '\n' && !self.is_at_end() {
                     self.advance();
                 }
             }
             TokenType::IGNORE => {}
-            TokenType::WHITESPACE => self.string(),
-            TokenType::NUMBER => self.number(),
-            TokenType::IDENTIFIER => self.identifier(),
+            TokenType::WHITESPACE => self.string()?,
+            TokenType::NUMBER => self.number()?,
+            TokenType::IDENTIFIER => self.identifier()?,
             _type => self.add_token(_type, None),
         };
+        Ok(())
     }
 
-    fn identifier(&mut self) {
-        while self.peek().is_alphanumeric() {
+    fn identifier(&mut self) -> Result<()>{
+        while self.peek()?.is_alphanumeric() {
             self.advance();
         }
         let start = self.start as usize;
         let current = self.current as usize;
-        let text = self.source.get(start..current).unwrap();
+        let text = self.source.get(start..current).context("Expected identifier")?;
         let _type: Result<TokenType> = text.parse::<TokenType>();
         match _type {
             Ok(keyword) => self.add_token(keyword, None),
             Err(_) => self.add_token(TokenType::IDENTIFIER, None),
         }
+        Ok(())
     }
 
-    fn number(&mut self) {
-        while self.peek().is_digit(10) {
+    fn number(&mut self) -> Result<()> {
+        while self.peek()?.is_digit(10) {
             self.advance();
         }
-        if self.peek() == '.' && self.peek_next().is_digit(10) {
+        if self.peek()? == '.' && self.peek_next().is_digit(10) {
             self.advance();
 
             while self.peek_next().is_digit(10) {
@@ -87,9 +90,10 @@ impl Scanner {
         let start = self.start as usize;
         let current = self.current as usize;
         let source = &self.source;
-        let literal_number = source.get(start..current).expect("Wrong slice");
-        let number = Literal::Number(literal_number.parse::<f64>().expect("Not a number"));
-        self.add_token(TokenType::NUMBER, Some(number))
+        let literal_number = source.get(start..current).context("Expected a number")?;
+        let number = Literal::Number(literal_number.parse::<f64>()?);
+        self.add_token(TokenType::NUMBER, Some(number));
+        Ok(())
     }
 
     fn peek_next(&self) -> char {
@@ -102,9 +106,9 @@ impl Scanner {
         }
     }
 
-    fn string(&mut self) {
-        while self.peek() != '\n' && self.is_at_end() {
-            if self.peek() == '\n' {
+    fn string(&mut self) -> Result<()> {
+        while self.peek()? != '\n' && self.is_at_end() {
+            if self.peek()? == '\n' {
                 self.line += 1;
             }
             self.advance();
@@ -115,17 +119,19 @@ impl Scanner {
         self.advance();
         let start = (self.start + 1) as usize;
         let end = (self.current - 1) as usize;
-        let value = self.source.get(start..end).unwrap();
-        self.add_token(TokenType::STRING, Some(Literal::String(value.to_string())))
+        let value = self.source.get(start..end).context("Expected end of string")?;
+        self.add_token(TokenType::STRING, Some(Literal::String(value.to_string())));
+        Ok(())
     }
-    fn peek(&mut self) -> char {
+    fn peek(&mut self) -> Result<char> {
         if self.is_at_end() {
-            return '\0';
+            return Ok('\0');
         }
-        return self.source.chars().nth(self.current as usize).unwrap();
+        return self.source.chars().nth(self.current as usize).context("Reached EOF");
     }
 
     fn can_match_with(&mut self, token: &TokenType, expected: char) -> bool {
+        let _ = token;
         let at_eof = self.is_at_end();
         let next_is_not_expected =
             expected != self.source.chars().nth(self.current as usize).unwrap();
@@ -146,6 +152,6 @@ impl Scanner {
         let end = self.current as usize;
         let text = source.get(start..end).expect("Empty token!");
         self.tokens
-            .push(Token::new(_type, text, literal, self.line))
+            .push(Token::new(_type, text, literal))
     }
 }
