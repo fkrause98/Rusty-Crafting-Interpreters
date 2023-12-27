@@ -1,10 +1,11 @@
-use anyhow::Result;
-use scanner_rust::generic_array::typenum::NonZero;
-use std::str::FromStr;
 use crate::token_type::{
     Literal, Token,
     TokenType::{self, BANG, EOF, EQUAL, GREATER, LESS},
 };
+use anyhow::Result;
+use scanner_rust::generic_array::typenum::NonZero;
+use std::str::FromStr;
+#[derive(Debug)]
 pub struct Scanner {
     source: String,
     tokens: Vec<Token>,
@@ -68,7 +69,7 @@ impl Scanner {
         let _type: Result<TokenType> = text.parse::<TokenType>();
         match _type {
             Ok(keyword) => self.add_token(keyword, None),
-            Err(_) => self.add_token(TokenType::IDENTIFIER, None)
+            Err(_) => self.add_token(TokenType::IDENTIFIER, None),
         }
     }
 
@@ -135,8 +136,9 @@ impl Scanner {
         return true;
     }
     fn advance(&mut self) -> Option<char> {
+        let next = self.source.chars().nth(self.current as usize);
         self.current += 1;
-        self.source.chars().nth(self.current as usize)
+        return next;
     }
     fn add_token(&mut self, _type: TokenType, literal: Option<Literal>) {
         let source = &self.source;
