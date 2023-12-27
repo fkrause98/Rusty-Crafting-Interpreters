@@ -44,19 +44,35 @@ impl Scanner {
             .context("Scanner Error: No characters left!")?;
         match TokenType::from(c) {
             _type if _type.is_combinable_with_eq() && self.can_match_with(&_type, '=') => {
+                println!("first branch");
                 _type.match_with_eq();
                 self.add_token(_type, None)
             }
             _type if _type.is_combinable_with_div() && self.can_match_with(&_type, '/') => {
+                println!("first branch");
                 while self.peek()? != '\n' && !self.is_at_end() {
                     self.advance();
                 }
             }
-            TokenType::IGNORE => {}
-            TokenType::WHITESPACE => self.string()?,
-            TokenType::NUMBER => self.number()?,
-            TokenType::IDENTIFIER => self.identifier()?,
-            _type => self.add_token(_type, None),
+            TokenType::IGNORE => {
+                println!("ignore branch");
+            }
+            TokenType::STRING => {
+                println!("string branch");
+                self.string()?
+            },
+            TokenType::NUMBER => {
+                println!("number branch");
+                self.number()?
+            },
+            TokenType::IDENTIFIER => {
+                println!("id branch");
+                self.identifier()?
+            },
+            _type => {
+                println!("identifier");
+                self.add_token(_type, None)
+            },
         };
         Ok(())
     }
@@ -72,6 +88,7 @@ impl Scanner {
             .get(start..current)
             .context("Expected identifier")?;
         let _type: Result<TokenType> = text.parse::<TokenType>();
+        println!("Parsed type: {:?}", _type);
         match _type {
             Ok(keyword) => self.add_token(keyword, None),
             Err(_) => self.add_token(TokenType::IDENTIFIER, None),
@@ -85,8 +102,7 @@ impl Scanner {
         }
         if self.peek()? == '.' && self.peek_next().is_ascii_digit() {
             self.advance();
-
-            while self.peek_next().is_ascii_digit() {
+            while self.peek()?.is_ascii_digit() {
                 self.advance();
             }
         }
@@ -110,7 +126,9 @@ impl Scanner {
     }
 
     fn string(&mut self) -> Result<()> {
-        while self.peek()? != '\n' && self.is_at_end() {
+        while self.peek()? != '\n' && !self.is_at_end() {
+            println!("{}", self.peek()?);
+            println!("{}", self.is_at_end());
             if self.peek()? == '\n' {
                 self.line += 1;
             }

@@ -56,7 +56,8 @@ pub enum TokenType {
 }
 impl From<char> for TokenType {
     fn from(c: char) -> Self {
-        match c {
+        let res =
+            match c {
             '(' => TokenType::LEFT_PAREN,
             ')' => TokenType::RIGHT_PAREN,
             '{' => TokenType::LEFT_BRACE,
@@ -77,7 +78,9 @@ impl From<char> for TokenType {
             c if c.is_ascii_digit() => TokenType::NUMBER,
             c if c.is_alphabetic() => TokenType::IDENTIFIER,
             _ => unreachable!("Unknown token!"),
-        }
+        };
+        println!("Converted: {:?}, to: {:?}", c, res);
+        return res;
     }
 }
 
@@ -85,21 +88,21 @@ impl std::str::FromStr for TokenType {
     type Err = Error;
     fn from_str(string: &str) -> Result<Self> {
         match string {
-            "and" => Ok(TokenType::WHILE),
-            "class" => Ok(TokenType::WHILE),
-            "else" => Ok(TokenType::WHILE),
-            "false" => Ok(TokenType::WHILE),
-            "for" => Ok(TokenType::WHILE),
-            "fun" => Ok(TokenType::WHILE),
-            "if" => Ok(TokenType::WHILE),
-            "nil" => Ok(TokenType::WHILE),
-            "or" => Ok(TokenType::WHILE),
-            "print" => Ok(TokenType::WHILE),
-            "return" => Ok(TokenType::WHILE),
-            "super" => Ok(TokenType::WHILE),
-            "this" => Ok(TokenType::WHILE),
-            "true" => Ok(TokenType::WHILE),
-            "var" => Ok(TokenType::WHILE),
+            "and" => Ok(TokenType::AND),
+            "class" => Ok(TokenType::CLASS),
+            "else" => Ok(TokenType::ELSE),
+            "false" => Ok(TokenType::FALSE),
+            "for" => Ok(TokenType::FOR),
+            "fun" => Ok(TokenType::FUN),
+            "if" => Ok(TokenType::IF),
+            "nil" => Ok(TokenType::NIL),
+            "or" => Ok(TokenType::OR),
+            "print" => Ok(TokenType::PRINT),
+            "return" => Ok(TokenType::RETURN),
+            "super" => Ok(TokenType::SUPER),
+            "this" => Ok(TokenType::THIS),
+            "true" => Ok(TokenType::TRUE),
+            "var" => Ok(TokenType::VAR),
             "while" => Ok(TokenType::WHILE),
             _ => bail!("Can only be used ofr identifiers"),
         }
