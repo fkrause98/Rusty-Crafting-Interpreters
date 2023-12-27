@@ -1,5 +1,4 @@
 use anyhow::Result;
-use scanner_rust::generic_array::typenum::NonZero;
 use std::{env::args, process::exit};
 use token_type::{Literal::Number, Token};
 pub mod ast_printer;
@@ -26,15 +25,19 @@ fn main() -> Result<()> {
                 _type: token_type::TokenType::MINUS,
                 lexeme: "-".to_string(),
                 literal: None,
-                line: 1usize
+                line: 1usize,
             },
             expression: &expression::Expression::Literal(Number(123.0_f64)),
         };
         let mul = Token::new(token_type::TokenType::STAR, "*", None, 1usize);
         let num = expression::Expression::Literal(Number(45.67_f64));
         let grouping = expression::Expression::Grouping { expression: &num };
-        let expression = expression::Expression::Binary { operator: mul, l_expression: &unary, r_expression: &grouping };
-        let ast = ast_printer::AstPrinter::print(&expression);
+        let expression = expression::Expression::Binary {
+            operator: mul,
+            l_expression: &unary,
+            r_expression: &grouping,
+        };
+        let ast = ast_printer::print(&expression);
         println!("{}", ast);
         // let expression::Expression = expression::Expression::Binary { operator: (), l_expression: (), r_expression: () };
         // lox.run_prompt()?;

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::string::ToString;
 
 use anyhow::{bail, Error, Ok, Result};
-use scanner_rust::generic_array::typenum::Minimum;
+
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum TokenType {
@@ -80,7 +80,7 @@ impl From<char> for TokenType {
             _ => unreachable!("Unknown token!"),
         };
         println!("Converted: {:?}, to: {:?}", c, res);
-        return res;
+        res
     }
 }
 
@@ -140,7 +140,7 @@ pub enum Literal {
 impl Literal {
     pub fn inner(&self) -> String {
         match self {
-            Self::String(string) => format!("{}", string),
+            Self::String(string) => string.to_string(),
             Self::Number(num) => format!("{}", num),
         }
     }
@@ -150,7 +150,7 @@ pub struct Token {
     pub _type: TokenType,
     pub lexeme: String,
     pub literal: Option<Literal>,
-    pub line: usize
+    pub line: usize,
 }
 
 impl Token {
@@ -160,7 +160,7 @@ impl Token {
             _type,
             lexeme,
             literal,
-            line
+            line,
         }
     }
 }

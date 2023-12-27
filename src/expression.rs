@@ -1,4 +1,4 @@
-use crate::token_type::{Literal, Token, TokenType};
+use crate::token_type::{Literal, Token};
 
 #[derive(Debug, Clone)]
 pub enum Expression<'a> {
